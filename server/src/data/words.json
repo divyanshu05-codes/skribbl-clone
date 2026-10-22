@@ -1,0 +1,40 @@
+{
+  "animals": [
+    "dog", "cat", "elephant", "giraffe", "monkey", "penguin", "lion", "tiger", "zebra", "kangaroo",
+    "dolphin", "octopus", "whale", "shark", "eagle", "parrot", "turtle", "rabbit", "panda", "koala",
+    "crocodile", "flamingo", "camel", "hamster", "hedgehog", "sloth", "cheetah", "hippopotamus",
+    "rhinoceros", "chameleon", "jellyfish", "lobster", "squirrel", "peacock", "walrus", "bat", "wolf",
+    "fox", "owl", "bear", "duck", "frog", "snake", "spider", "bee", "butterfly", "snail", "crab"
+  ],
+  "food": [
+    "pizza", "burger", "ice cream", "banana", "apple", "sandwich", "spaghetti", "hotdog", "taco", "sushi",
+    "pancake", "waffle", "donut", "popcorn", "cookie", "chocolate", "croissant", "pineapple", "watermelon",
+    "strawberry", "avocado", "broccoli", "carrot", "cheese", "cupcake", "lollipop", "french fries",
+    "pretzel", "steak", "egg", "bacon", "bread", "grapes", "lemon", "mushroom", "onion", "cherry"
+  ],
+  "objects": [
+    "umbrella", "camera", "guitar", "laptop", "telephone", "clock", "scissors", "backpack", "sunglasses",
+    "telescope", "microscope", "toothbrush", "flashlight", "candle", "balloon", "skateboard", "bicycle",
+    "helmet", "compass", "key", "lock", "mirror", "pillow", "blanket", "bucket", "ladder", "hammer",
+    "screwdriver", "wrench", "paintbrush", "pencil", "book", "chair", "table", "lamp", "television",
+    "sofa", "teapot", "frying pan", "trophy", "crown", "sword", "shield", "hourglass", "kite", "tent"
+  ],
+  "places": [
+    "castle", "pyramid", "lighthouse", "hospital", "school", "library", "airport", "beach", "volcano",
+    "desert", "forest", "mountain", "island", "bridge", "windmill", "stadium", "circus", "cinema",
+    "restaurant", "supermarket", "aquarium", "museum", "space station", "farm", "park", "playground"
+  ],
+  "actions": [
+    "swimming", "dancing", "cooking", "sleeping", "running", "singing", "painting", "reading", "fishing",
+    "flying", "jumping", "climbing", "driving", "skating", "surfing", "diving", "sneezing", "laughing",
+    "crying", "yawning", "whispering", "juggle", "juggling", "meditating", "gardening", "shopping"
+  ],
+  "nature": [
+    "rainbow", "tornado", "waterfall", "sunflower", "snowflake", "lightning", "cloud", "sun", "moon",
+    "star", "tree", "river", "cave", "flower", "leaf", "rain", "fire", "wave", "comet", "meteor"
+  ],
+  "vehicles": [
+    "airplane", "helicopter", "rocket", "submarine", "train", "motorcycle", "ambulance", "fire truck",
+    "police car", "tractor", "sailboat", "spaceship", "bulldozer", "scooter", "hot air balloon"
+  ]
+}

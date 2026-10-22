@@ -1,0 +1,31 @@
+{
+  "name": "skribbl-clone",
+  "version": "1.0.0",
+  "description": "Full-stack real-time multiplayer drawing and guessing game clone of skribbl.io",
+  "main": "server/dist/server.js",
+  "scripts": {
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev",
+    "dev": "concurrently -n \"SERVER,CLIENT\" -c \"blue,green\" \"npm run dev:server\" \"npm run dev:client\"",
+    "build:client": "npm --prefix client run build",
+    "build:server": "npm --prefix server run build",
+    "build": "npm run build:client && npm run build:server",
+    "start": "node server/dist/server.js",
+    "install:all": "npm install && npm --prefix server install && npm --prefix client install"
+  },
+  "keywords": [
+    "skribbl",
+    "pictionary",
+    "multiplayer",
+    "websocket",
+    "socket.io",
+    "react",
+    "canvas",
+    "fullstack"
+  ],
+  "author": "Divyanshu Pal",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
