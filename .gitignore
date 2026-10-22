@@ -10,10 +10,12 @@ build/
 client/dist/
 server/dist/
 
-# Environment
+# Environment and local secrets
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
+*.enc
+*.enc.*
 
 # OS
 .DS_Store

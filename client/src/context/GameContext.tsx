@@ -62,9 +62,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Initialize socket connection once
   useEffect(() => {
-    // In dev, Vite proxies /socket.io to backend port 3001
-    // In production, served from same host
-    const socketUrl = window.location.origin;
+    // In dev, connects to backend on port 3001
+    // In production, connects to the same origin
+    const socketUrl = import.meta.env.VITE_SERVER_URL || (import.meta.env.DEV ? 'http://localhost:3001' : window.location.origin);
     const newSocket = io(socketUrl, {
       transports: ['websocket', 'polling'],
       autoConnect: true
