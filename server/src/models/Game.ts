@@ -133,7 +133,9 @@ export class Game {
     if (this.phase !== 'CHOOSING_WORD') return;
     this.clearTimer();
 
-    this.currentWord = word.trim().toLowerCase();
+    const cleanWord = word.trim().toLowerCase();
+    const isOffered = this.wordChoices.some(w => w.toLowerCase() === cleanWord);
+    this.currentWord = isOffered ? cleanWord : (this.wordChoices[0] || 'apple');
     this.phase = 'DRAWING';
     this.timeLeft = this.drawTime;
     this.revealedIndices.clear();

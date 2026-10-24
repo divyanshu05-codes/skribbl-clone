@@ -11,6 +11,8 @@ export class Room {
   public game: Game;
   public chatMessages: ChatMessage[] = [];
   public bannedIds: Set<string> = new Set();
+  public bannedSocketIds: Set<string> = new Set();
+  public bannedIps: Set<string> = new Set();
   public votekicks: Map<string, Set<string>> = new Map(); // targetId -> Set<voterId>
   public createdAt: number = Date.now();
 
@@ -50,8 +52,23 @@ export class Room {
     this.game.setSettings(this.settings);
   }
 
-  public addPlayer(player: Player): boolean {
-    if (this.bannedIds.has(player.id)) return false;
+  public isBanned(socketId: string, ipAddress?: string, playerId?: string): boolean {
+    if (this.bannedSocketIds.has(socketId)) return true;
+    if (this.bannedIds.has(socketId)) return true;
+    if (playerId && this.bannedIds.has(playerId)) return true;
+    if (ipAddress && this.bannedIps.has(ipAddress)) return true;
+    return false;
+  }
+
+  public banPlayer(targetId: string, socketId?: string, ipAddress?: string): void {
+    this.bannedIds.add(targetId);
+    if (socketId) this.bannedSocketIds.add(socketId);
+    if (ipAddress) this.bannedIps.add(ipAddress);
+    this.removePlayer(targetId);
+  }
+
+  public addPlayer(player: Player, ipAddress?: string): boolean {
+    if (this.isBanned(player.socketId, ipAddress, player.id)) return false;
     if (this.players.size >= this.settings.maxPlayers) return false;
 
     if (this.players.size === 0) {
@@ -131,7 +148,7 @@ export class Room {
     this.game.setSettings(this.settings);
   }
 
-  public voteKick(voterId: string, targetId: string): { kicked: boolean; count: number; required: number } {
+  public voteKick(voterId: string, targetId: string, ipAddress?: string): { kicked: boolean; count: number; required: number } {
     if (!this.players.has(targetId) || voterId === targetId) {
       return { kicked: false, count: 0, required: 0 };
     }
@@ -148,20 +165,22 @@ export class Room {
     const required = Math.max(2, Math.floor(totalPlayers / 2) + 1);
 
     if (voters.size >= required) {
-      this.bannedIds.add(targetId);
-      this.removePlayer(targetId);
+      const targetPlayer = this.players.get(targetId);
+      this.banPlayer(targetId, targetPlayer?.socketId, ipAddress);
       return { kicked: true, count: voters.size, required };
     }
 
     return { kicked: false, count: voters.size, required };
   }
 
-  public kickPlayer(targetId: string, isBan: boolean = false): boolean {
-    if (!this.players.has(targetId)) return false;
+  public kickPlayer(targetId: string, isBan: boolean = false, ipAddress?: string): boolean {
+    const targetPlayer = this.players.get(targetId);
+    if (!targetPlayer) return false;
     if (isBan) {
-      this.bannedIds.add(targetId);
+      this.banPlayer(targetId, targetPlayer.socketId, ipAddress);
+    } else {
+      this.removePlayer(targetId);
     }
-    this.removePlayer(targetId);
     return true;
   }
 

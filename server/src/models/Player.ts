@@ -29,7 +29,7 @@ export class Player {
   }
 
   public addScore(points: number): void {
-    this.roundScore = points;
+    this.roundScore += points;
     this.score += points;
   }
 

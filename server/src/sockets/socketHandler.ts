@@ -91,6 +91,56 @@ export function registerSocketHandlers(io: Server) {
       });
     };
 
+    // Helper to join a socket to a room cleanly
+    const joinPlayerToRoom = (room: any, playerName: string, avatar: AvatarConfig, isPrivateCodeProvided: boolean = false) => {
+      if (room.settings.isPrivate && !isPrivateCodeProvided) {
+        socket.emit('join_error', { message: 'This room is private. You must join via invite link or room code.' });
+        return;
+      }
+
+      if (room.isFull()) {
+        socket.emit('join_error', { message: 'Room is already full!' });
+        return;
+      }
+
+      if (room.isBanned(socket.id, socket.handshake.address)) {
+        socket.emit('join_error', { message: 'You have been kicked/banned from this room.' });
+        return;
+      }
+
+      const player = new Player('p_' + Math.random().toString(36).substring(2, 9), socket.id, playerName, avatar, false);
+      const added = room.addPlayer(player, socket.handshake.address);
+      if (!added) {
+        socket.emit('join_error', { message: 'Unable to join room.' });
+        return;
+      }
+
+      socket.join(room.id);
+
+      socket.emit('room_joined', {
+        roomId: room.id,
+        roomCode: room.code,
+        player: player.toJSON(),
+        settings: room.settings
+      });
+
+      // Send canvas history so new player catches up immediately
+      socket.emit('canvas_history', { actions: room.game.canvasActions });
+
+      // Notify others in room
+      const joinMsg: ChatMessage = {
+        id: 'join_' + Date.now(),
+        text: `${player.name} joined the room!`,
+        type: 'join_leave',
+        timestamp: Date.now()
+      };
+      io.to(room.id).emit('chat_message', joinMsg);
+      io.to(room.id).emit('players_update', room.getPlayersList().map((p: any) => p.toJSON()));
+      io.to(room.id).emit('player_joined', { player: player.toJSON() });
+
+      sendStateToPlayer(room, player, socket);
+    };
+
     // 1. CREATE ROOM
     socket.on('create_room', ({ hostName, avatar, settings }: { hostName: string; avatar: AvatarConfig; settings?: Partial<RoomSettings> }) => {
       const host = new Player('p_' + Math.random().toString(36).substring(2, 9), socket.id, hostName, avatar, true);
@@ -118,47 +168,9 @@ export function registerSocketHandlers(io: Server) {
         return;
       }
 
-      if (room.isFull()) {
-        socket.emit('join_error', { message: 'Room is already full!' });
-        return;
-      }
-
-      if (room.bannedIds.has(socket.id)) {
-        socket.emit('join_error', { message: 'You have been kicked/banned from this room.' });
-        return;
-      }
-
-      const player = new Player('p_' + Math.random().toString(36).substring(2, 9), socket.id, playerName, avatar, false);
-      const added = room.addPlayer(player);
-      if (!added) {
-        socket.emit('join_error', { message: 'Unable to join room.' });
-        return;
-      }
-
-      socket.join(room.id);
-
-      socket.emit('room_joined', {
-        roomId: room.id,
-        roomCode: room.code,
-        player: player.toJSON(),
-        settings: room.settings
-      });
-
-      // Send canvas history so new player catches up immediately
-      socket.emit('canvas_history', { actions: room.game.canvasActions });
-
-      // Notify others in room
-      const joinMsg: ChatMessage = {
-        id: 'join_' + Date.now(),
-        text: `${player.name} joined the room!`,
-        type: 'join_leave',
-        timestamp: Date.now()
-      };
-      io.to(room.id).emit('chat_message', joinMsg);
-      io.to(room.id).emit('players_update', room.getPlayersList().map(p => p.toJSON()));
-      io.to(room.id).emit('player_joined', { player: player.toJSON() });
-
-      sendStateToPlayer(room, player, socket);
+      // If room is private, must join via invite code (from invite link or typed room code)
+      const isViaInviteCode = (roomId.trim().toUpperCase() === room.code);
+      joinPlayerToRoom(room, playerName, avatar, isViaInviteCode);
     });
 
     // 3. GET PUBLIC ROOMS & QUICK JOIN
@@ -169,7 +181,8 @@ export function registerSocketHandlers(io: Server) {
     socket.on('quick_join', ({ playerName, avatar }: { playerName: string; avatar: AvatarConfig }) => {
       const targetRoom = roomManager.getRandomPublicRoom();
       if (targetRoom) {
-        socket.emit('quick_join_found', { roomId: targetRoom.id });
+        // Direct server join without client state dependency
+        joinPlayerToRoom(targetRoom, playerName, avatar, true);
       } else {
         // Auto-create an open public room!
         const host = new Player('p_' + Math.random().toString(36).substring(2, 9), socket.id, playerName, avatar, true);
@@ -228,7 +241,15 @@ export function registerSocketHandlers(io: Server) {
       const player = room.getPlayerBySocket(socket.id);
       if (!player || player.id !== room.game.currentDrawerId) return;
 
-      room.game.selectWord(word, room.getPlayersList());
+      // Validate that chosen word is one of the offered choices
+      const cleanWord = word?.trim().toLowerCase();
+      const isOffered = room.game.wordChoices.some(w => w.toLowerCase() === cleanWord);
+      if (!isOffered) {
+        socket.emit('error_message', { message: 'Invalid word choice. Must choose from offered words.' });
+        return;
+      }
+
+      room.game.selectWord(cleanWord, room.getPlayersList());
     });
 
     // 7. REAL-TIME DRAWING ACTIONS
@@ -254,7 +275,8 @@ export function registerSocketHandlers(io: Server) {
       if (!player || player.id !== room.game.currentDrawerId) return;
 
       room.game.addCanvasAction({ type: 'clear' });
-      io.to(room.id).emit('canvas_clear');
+      // Broadcast to all other clients (drawer already cleared locally)
+      socket.to(room.id).emit('canvas_clear');
     });
 
     // Undo stroke
@@ -266,7 +288,8 @@ export function registerSocketHandlers(io: Server) {
       if (!player || player.id !== room.game.currentDrawerId) return;
 
       room.game.addCanvasAction({ type: 'undo' });
-      io.to(room.id).emit('draw_undo');
+      // Broadcast to all other clients (drawer already removed last stroke locally)
+      socket.to(room.id).emit('draw_undo');
     });
 
     // 8. CHAT & GUESSING
@@ -373,7 +396,9 @@ export function registerSocketHandlers(io: Server) {
       const target = room.getPlayer(targetId);
       if (!target) return;
 
-      const { kicked, count, required } = room.voteKick(player.id, targetId);
+      const targetSocket = io.sockets.sockets.get(target.socketId);
+      const ipAddress = targetSocket?.handshake?.address;
+      const { kicked, count, required } = room.voteKick(player.id, targetId, ipAddress);
 
       const voteMsg: ChatMessage = {
         id: 'vk_' + Date.now(),
@@ -404,9 +429,9 @@ export function registerSocketHandlers(io: Server) {
       const target = room.getPlayer(targetId);
       if (!target || target.isHost) return;
 
-      room.kickPlayer(targetId, isBan);
-
       const targetSocket = io.sockets.sockets.get(target.socketId);
+      const ipAddress = targetSocket?.handshake?.address;
+      room.kickPlayer(targetId, isBan, ipAddress);
       if (targetSocket) {
         targetSocket.emit('kicked_notice', { message: isBan ? 'You were banned by the host.' : 'You were kicked by the host.' });
         targetSocket.leave(room.id);
