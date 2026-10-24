@@ -241,4 +241,3 @@ export const GameRoom: React.FC = () => {
     </div>
   );
 };
-};
