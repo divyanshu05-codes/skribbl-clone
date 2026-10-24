@@ -10,7 +10,7 @@ Create a room, invite your friends, and see who can guess the word first.
 [![Node.js](https://img.shields.io/badge/Node.js-20+-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![Socket.IO](https://img.shields.io/badge/Socket.IO-Real--Time-010101?logo=socketdotio&logoColor=white)](https://socket.io/)
 
-**🌐 Live Demo:** [Add your deployed Render URL here]
+**🌐 Live Demo:** https://skribbl-clone-1-6m5f.onrender.com/
 
 ## ✨ About the Game
 
