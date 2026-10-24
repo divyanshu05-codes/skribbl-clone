@@ -66,74 +66,96 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   }
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 p-2.5 bg-slate-800/95 backdrop-blur-md rounded-2xl border border-slate-700/80 shadow-xl select-none">
-      {/* Tool buttons */}
-      <div className="flex items-center gap-1.5 bg-slate-900/80 p-1 rounded-xl border border-slate-700/50">
-        <button
-          onClick={() => setTool('brush')}
-          title="Pen / Brush"
-          className={`p-2 rounded-lg transition-all ${
-            tool === 'brush'
-              ? 'bg-blue-600 text-white shadow-md scale-105'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800'
-          }`}
-        >
-          <Paintbrush size={18} />
-        </button>
-
-        <button
-          onClick={() => setTool('fill')}
-          title="Bucket / Fill Tool"
-          className={`p-2 rounded-lg transition-all ${
-            tool === 'fill'
-              ? 'bg-blue-600 text-white shadow-md scale-105'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800'
-          }`}
-        >
-          <PaintBucket size={18} />
-        </button>
-
-        <button
-          onClick={() => setTool('eraser')}
-          title="Eraser"
-          className={`p-2 rounded-lg transition-all ${
-            tool === 'eraser'
-              ? 'bg-blue-600 text-white shadow-md scale-105'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800'
-          }`}
-        >
-          <Eraser size={18} />
-        </button>
-      </div>
-
-      {/* Brush sizes */}
-      <div className="flex items-center gap-1.5 bg-slate-900/80 px-2 py-1 rounded-xl border border-slate-700/50">
-        {BRUSH_SIZES.map((b) => (
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-2 p-2 bg-slate-800/95 backdrop-blur-md rounded-2xl border border-slate-700/80 shadow-xl select-none w-full">
+      {/* Group 1: Tools, Sizes, and Actions */}
+      <div className="flex items-center justify-between sm:justify-start w-full sm:w-auto gap-1.5 sm:gap-2">
+        {/* Tool buttons */}
+        <div className="flex items-center gap-1 bg-slate-900/80 p-1 rounded-xl border border-slate-700/50">
           <button
-            key={b.label}
-            onClick={() => setSize(b.size)}
-            title={`Size ${b.label}`}
-            className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all ${
-              size === b.size
-                ? 'bg-blue-600/40 border border-blue-400 text-blue-300'
-                : 'hover:bg-slate-800 text-slate-400'
+            onClick={() => setTool('brush')}
+            title="Pen / Brush"
+            className={`p-1.5 sm:p-2 rounded-lg transition-all ${
+              tool === 'brush'
+                ? 'bg-blue-600 text-white shadow-md scale-105'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800'
             }`}
           >
-            <div
-              className="rounded-full bg-current"
-              style={{ width: b.dotRadius, height: b.dotRadius }}
-            />
+            <Paintbrush size={16} />
           </button>
-        ))}
+
+          <button
+            onClick={() => setTool('fill')}
+            title="Bucket / Fill Tool"
+            className={`p-1.5 sm:p-2 rounded-lg transition-all ${
+              tool === 'fill'
+                ? 'bg-blue-600 text-white shadow-md scale-105'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            <PaintBucket size={16} />
+          </button>
+
+          <button
+            onClick={() => setTool('eraser')}
+            title="Eraser"
+            className={`p-1.5 sm:p-2 rounded-lg transition-all ${
+              tool === 'eraser'
+                ? 'bg-blue-600 text-white shadow-md scale-105'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            <Eraser size={16} />
+          </button>
+        </div>
+
+        {/* Brush sizes */}
+        <div className="flex items-center gap-1 bg-slate-900/80 px-1.5 py-1 rounded-xl border border-slate-700/50">
+          {BRUSH_SIZES.map((b) => (
+            <button
+              key={b.label}
+              onClick={() => setSize(b.size)}
+              title={`Size ${b.label}`}
+              className={`w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-lg transition-all ${
+                size === b.size
+                  ? 'bg-blue-600/40 border border-blue-400 text-blue-300'
+                  : 'hover:bg-slate-800 text-slate-400'
+              }`}
+            >
+              <div
+                className="rounded-full bg-current"
+                style={{ width: Math.max(3, b.dotRadius - 1), height: Math.max(3, b.dotRadius - 1) }}
+              />
+            </button>
+          ))}
+        </div>
+
+        {/* Undo and Clear actions */}
+        <div className="flex items-center gap-1 bg-slate-900/80 p-1 rounded-xl border border-slate-700/50">
+          <button
+            onClick={undoCanvas}
+            title="Undo (Ctrl+Z)"
+            className="p-1.5 sm:p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all active:scale-95"
+          >
+            <RotateCcw size={16} />
+          </button>
+
+          <button
+            onClick={clearCanvas}
+            title="Clear Canvas"
+            className="p-1.5 sm:p-2 text-rose-400 hover:text-rose-200 hover:bg-rose-950/50 rounded-lg transition-all active:scale-95"
+          >
+            <Trash2 size={16} />
+          </button>
+        </div>
       </div>
 
-      {/* Colors palette */}
-      <div className="flex items-center gap-2">
+      {/* Group 2: Palette and Color Picker */}
+      <div className="flex items-center justify-center gap-1.5 sm:gap-2 w-full sm:w-auto">
         {/* Active color preview & custom picker */}
-        <div className="relative group flex items-center">
+        <div className="relative group flex items-center shrink-0">
           <label
             title="Custom Color"
-            className="w-8 h-8 rounded-xl border-2 border-white/60 shadow-md cursor-pointer overflow-hidden flex items-center justify-center transition-transform hover:scale-105"
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl border-2 border-white/60 shadow-md cursor-pointer overflow-hidden flex items-center justify-center transition-transform hover:scale-105"
             style={{ backgroundColor: color }}
           >
             <input
@@ -145,12 +167,12 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               }}
               className="opacity-0 absolute inset-0 cursor-pointer w-full h-full"
             />
-            <Pipette size={14} className="text-white mix-blend-difference opacity-75" />
+            <Pipette size={13} className="text-white mix-blend-difference opacity-75" />
           </label>
         </div>
 
         {/* 20 palette colors in 2 rows of 10 */}
-        <div className="grid grid-cols-10 gap-1 bg-slate-900/80 p-1.5 rounded-xl border border-slate-700/50">
+        <div className="grid grid-cols-10 gap-1 bg-slate-900/80 p-1 sm:p-1.5 rounded-xl border border-slate-700/50 shrink-0">
           {SKRIBBL_PALETTE.map((c) => (
             <button
               key={c}
@@ -158,7 +180,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 setColor(c);
                 if (tool === 'eraser') setTool('brush');
               }}
-              className={`w-5 h-5 rounded-md transition-transform hover:scale-125 border ${
+              className={`w-4 h-4 sm:w-5 sm:h-5 rounded-md transition-transform hover:scale-125 border ${
                 color.toLowerCase() === c.toLowerCase() && tool !== 'eraser'
                   ? 'border-white scale-110 shadow-sm ring-2 ring-blue-500'
                   : 'border-black/30'
@@ -167,25 +189,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             />
           ))}
         </div>
-      </div>
-
-      {/* Undo and Clear actions */}
-      <div className="flex items-center gap-1.5 bg-slate-900/80 p-1 rounded-xl border border-slate-700/50">
-        <button
-          onClick={undoCanvas}
-          title="Undo (Ctrl+Z)"
-          className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all active:scale-95"
-        >
-          <RotateCcw size={18} />
-        </button>
-
-        <button
-          onClick={clearCanvas}
-          title="Clear Canvas"
-          className="p-2 text-rose-400 hover:text-rose-200 hover:bg-rose-950/50 rounded-lg transition-all active:scale-95"
-        >
-          <Trash2 size={18} />
-        </button>
       </div>
     </div>
   );
