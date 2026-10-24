@@ -1,63 +1,136 @@
-# Skribbl Clone
+# 🎨 Skribbl Clone
 
-A full-stack, real-time multiplayer drawing and guessing game built with React, TypeScript, Node.js, Express, Socket.IO, and HTML Canvas.
+### Draw it. Guess it. Beat the clock.
 
-## Features
+A real-time multiplayer drawing and guessing game inspired by skribbl.io.  
+Create a room, invite your friends, and see who can guess the word first.
 
-- Multiplayer rooms with room codes and invite links
-- Real-time synchronized drawing, undo, clear, and late-join canvas history
-- Word selection, timed rounds, chat guesses, hints, scoring, and leaderboard
-- Player avatars, moderation tools, and a podium at game end
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-20+-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Socket.IO](https://img.shields.io/badge/Socket.IO-Real--Time-010101?logo=socketdotio&logoColor=white)](https://socket.io/)
 
-## Requirements
+**🌐 Live Demo:** [Add your deployed Render URL here]
 
-- Node.js 20 or newer
+## ✨ About the Game
+
+Skribbl Clone brings the fun of drawing and word guessing into a multiplayer browser game. Players take turns choosing a word and drawing it on a shared canvas while everyone else races to guess correctly.
+
+## 🕹️ Features
+
+| 🎯 Rooms & Lobby | 🖌️ Drawing | 💬 Gameplay |
+| --- | --- | --- |
+| Public and private rooms | Live canvas synchronization | Real-time chat and guesses |
+| Room codes and invite links | Color palette and custom colors | Timed rounds and hints |
+| Public room browsing and Quick Join | Brush sizes, eraser, and fill | Correct-guess scoring |
+| Host controls and room settings | Undo and clear canvas | Leaderboard and winner podium |
+
+Additional features include custom word lists, player avatars, late-join canvas history, host moderation, and vote-kick.
+
+## 🚀 Get Started
+
+### Requirements
+
+- [Node.js 20 or newer](https://nodejs.org/)
 - npm
 
-## Run locally
+### Install dependencies
 
-From the project root, install dependencies:
+From the project root:
 
-```powershell
+```bash
 npm run install:all
 ```
 
-Start the client and server together:
+### Start the game locally
 
-```powershell
+```bash
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173). The Vite client connects to the development server on port 3001. Keep the terminal running while you play. Open a second tab or browser window to try multiplayer.
+Open **[http://localhost:5173](http://localhost:5173)**. The frontend connects to the development server on port `3001`.
 
-## Build and run production mode locally
+To try multiplayer, open a second browser tab, create or join the same room, and start a game.
 
-```powershell
+### Build and run in production mode
+
+```bash
 npm run build
 npm start
 ```
 
-Open [http://localhost:3001](http://localhost:3001).
+Then open **[http://localhost:3001](http://localhost:3001)**.
 
-## Deploy on Render
+## 🔄 How a Round Works
 
-The repository includes a `render.yaml` blueprint. You can also create a Render **Web Service** connected to the GitHub repository with:
+```text
+Create a room → Invite players → Choose a word → Draw → Guess → Score
+```
 
-- Build command: `npm run install:all && npm run build`
-- Start command: `npm start`
-- Runtime: Node
+1. The host creates a room and chooses its settings.
+2. Players join using the room code or invite link.
+3. The host starts the game when at least two players have joined.
+4. The selected drawer picks a word from the choices.
+5. The drawer sketches while the other players submit guesses in chat.
+6. Correct guesses earn points. The drawer earns a bonus when players guess correctly.
+7. The round ends when time runs out or everyone has guessed. The game continues through the turns and then shows the leaderboard.
 
-The service serves the built client and Socket.IO from one Node process. Use the public URL assigned by Render after deployment. Do not put `localhost` in production settings.
+## 🧱 Built With
 
-## Environment files and secrets
+- **Frontend:** React, TypeScript, Vite, Tailwind CSS
+- **Drawing:** HTML Canvas API
+- **Backend:** Node.js, Express, TypeScript
+- **Real-time events:** Socket.IO
+- **Deployment:** Render or Docker
 
-This project does not currently require API keys or other secret values to run. The optional client setting `VITE_SERVER_URL` can point to a separately hosted Socket.IO server; leave it unset for the local and same-origin defaults. `.env.example` contains only a blank template.
+## 🏗️ Project Structure
 
-Put any future private values in a local `.env` file (or an appropriately encrypted `.enc` file), and keep the encryption key separate from the encrypted file. `.gitignore` excludes `.env` files and `.enc` files. Never put real secrets in `.env.example`, source code, or a public repository. If a secret is ever committed, revoke or rotate it; removing the file alone does not erase it from Git history.
+```text
+.
+├── client/                  # React and Vite frontend
+│   └── src/
+│       ├── components/      # Lobby, canvas, chat, and game UI
+│       └── context/         # Shared game state and Socket.IO client
+├── server/                  # Express and Socket.IO backend
+│   └── src/
+│       ├── data/            # Word lists
+│       ├── models/          # Game, player, and room models
+│       ├── services/        # Room and word services
+│       └── sockets/         # Real-time event handlers
+├── Dockerfile
+├── render.yaml
+└── package.json
+```
 
-## Project layout
+## ⚙️ How It Works
 
-- `client/` — React and Vite application
-- `server/` — Express, Socket.IO, game state, and room management
-- `render.yaml` — Render service configuration
-- `Dockerfile` — Docker build and runtime configuration
+The server manages rooms, player turns, word choices, timers, guesses, and scoring. Socket.IO sends game updates, chat messages, and drawing actions between players. The frontend renders drawing actions on an HTML canvas and keeps the canvas history for players who join during a round.
+
+In production, the Node.js server serves the built frontend and the Socket.IO connection from the same origin.
+
+## 🐳 Run with Docker
+
+Build the image from the project root:
+
+```bash
+docker build -t skribbl-clone .
+```
+
+Run the container:
+
+```bash
+docker run --rm -p 3001:3001 skribbl-clone
+```
+
+Open **[http://localhost:3001](http://localhost:3001)**.
+
+## 📜 Available Scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run install:all` | Install root, client, and server dependencies |
+| `npm run dev` | Start the frontend and backend for development |
+| `npm run build` | Build the frontend and compile the backend |
+| `npm start` | Start the production server |
+
+### Grab your friends and start drawing! 🎉
