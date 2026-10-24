@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import {
   PlayerData,
@@ -59,6 +59,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [canvasHistory, setCanvasHistory] = useState<CanvasAction[]>([]);
   const [publicRooms, setPublicRooms] = useState<RoomInfoPublic[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const pendingProfileRef = useRef<{ playerName: string; avatar: AvatarConfig } | null>(null);
 
   // Initialize socket connection once
   useEffect(() => {
@@ -201,11 +202,15 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     socket.on('quick_join_found', ({ roomId: targetId }: { roomId: string }) => {
-      if (player) {
+      const profile = pendingProfileRef.current;
+      const targetName = profile?.playerName || player?.name;
+      const targetAvatar = profile?.avatar || player?.avatar;
+
+      if (targetName && targetAvatar) {
         socket.emit('join_room', {
           roomId: targetId,
-          playerName: player.name,
-          avatar: player.avatar
+          playerName: targetName,
+          avatar: targetAvatar
         });
       }
     });
@@ -252,6 +257,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const quickJoin = useCallback((playerName: string, avatar: AvatarConfig) => {
     if (!socket) return;
+    pendingProfileRef.current = { playerName, avatar };
     socket.emit('quick_join', { playerName, avatar });
   }, [socket]);
 
